@@ -7,7 +7,7 @@ const defaultName = "you"
 
 // ShareWith Given a name, return a string with the message: One for X, one for me.
 func ShareWith(name string) string {
-	if len(name) == 0 {
+	if name == "" {
 		name = defaultName
 	}
 	return fmt.Sprintf("One for %s, one for me.", name)
