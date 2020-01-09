@@ -14,7 +14,7 @@ const ErrLengthMismatch = InputError("strings must be the same length")
 //Distance Find the number of differences between 2 equal length strings
 func Distance(a, b string) (int, error) {
 	if len(a) != len(b) {
-		return -1, ErrLengthMismatch
+		return 0, ErrLengthMismatch
 	}
 
 	d := 0
