@@ -65,15 +65,21 @@ var testCases = []struct {
 		true,
 	},
 	{
-		"日本語",
-		"日本語",
+		"world!", // 6 bytes, 6 runes
+		"世界",     // 6 bytes, 2 runes
 		0,
+		true,
+	},
+	{
+		"w界",
+		"世界",
+		1,
 		false,
 	},
 	{
-		"日本語",
+		"Ǣæⱳ",
 		"日語本",
-		2,
+		3,
 		false,
 	},
 }
