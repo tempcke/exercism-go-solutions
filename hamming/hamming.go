@@ -1,23 +1,19 @@
 // Package hamming is used to calculate the Hamming Distance between two DNA strands.
 package hamming
 
-//InputError strings must be the same length
-type InputError string
+import "errors"
 
-func (e InputError) Error() string {
-	return string(e)
-}
-
-//ErrLengthMismatch strings must be the same length
-const ErrLengthMismatch = InputError("strings must be the same length")
+const errLengthMismatch = "strings must be the same length"
 
 //Distance Find the number of differences between 2 equal length strings
 func Distance(a, b string) (int, error) {
-	x, y, d := []rune(a), []rune(b), 0
+	x, y := []rune(a), []rune(b)
 
 	if len(x) != len(y) {
-		return 0, ErrLengthMismatch
+		return 0, errors.New(errLengthMismatch)
 	}
+
+	var d int
 
 	for i := range x {
 		if x[i] != y[i] {
