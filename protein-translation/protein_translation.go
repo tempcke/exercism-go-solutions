@@ -2,7 +2,10 @@ package protein
 
 import "errors"
 
+//ErrInvalidBase invalid sequence in string
 var ErrInvalidBase = errors.New("invalid")
+
+//ErrStop encountered stop sequence
 var ErrStop = errors.New("stop")
 
 var codonProteinMap = map[string]string{
@@ -25,6 +28,7 @@ var codonProteinMap = map[string]string{
 	"UGA": "STOP",
 }
 
+//FromCodon converts a 3 char codon string to a protein name
 func FromCodon(codon string) (string, error) {
 	p := codonProteinMap[codon]
 	switch p {
@@ -37,7 +41,8 @@ func FromCodon(codon string) (string, error) {
 	}
 }
 
-func FromRNA(rna string) (interface{}, error) {
+//FromRNA converts an rna string into a slice of codons
+func FromRNA(rna string) ([]string, error) {
 	var codon string
 	var output []string
 	for _, char := range rna {
