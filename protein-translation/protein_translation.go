@@ -30,34 +30,29 @@ var codonProteinMap = map[string]string{
 
 //FromCodon converts a 3 char codon string to a protein name
 func FromCodon(codon string) (string, error) {
-	p := codonProteinMap[codon]
-	switch p {
-	case "STOP":
-		return "", ErrStop
-	case "":
+	p, valid := codonProteinMap[codon]
+	if !valid {
 		return "", ErrInvalidBase
-	default:
-		return p, nil
 	}
+	if p == "STOP" {
+		return "", ErrStop
+	}
+	return p, nil
 }
 
-//FromRNA converts an rna string into a slice of codons
+//FromRNA converts an rna string into a slice of proteins
 func FromRNA(rna string) ([]string, error) {
-	var codon string
-	var output []string
-	for _, char := range rna {
-		codon += string(char)
-		if len(codon) == 3 {
-			p, err := FromCodon(codon)
-			if err == ErrInvalidBase {
-				return output, err
-			}
-			if err == ErrStop {
-				return output, nil
-			}
-			output = append(output, p)
-			codon = ""
+	var proteins []string
+	for i := 0; i < len(rna); i = i + 3 {
+		c := rna[i : i+3]
+		p, err := FromCodon(c)
+		if err == ErrStop {
+			return proteins, nil
 		}
+		if err != nil {
+			return proteins, err
+		}
+		proteins = append(proteins, p)
 	}
-	return output, nil
+	return proteins, nil
 }
