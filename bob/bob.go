@@ -4,7 +4,7 @@ package bob
 import "strings"
 
 const (
-	responseToEmpty           = "Fine. Be that way!"
+	responseToSilence         = "Fine. Be that way!"
 	responseToYellingQuestion = "Calm down, I know what I'm doing!"
 	responseToYelling         = "Whoa, chill out!"
 	responseToQuestion        = "Sure."
@@ -13,33 +13,38 @@ const (
 
 // Hey takes a remark and produces a lackadaisical response
 func Hey(remark string) string {
-	trimmedRemark := strings.TrimSpace(remark)
+	r := Remark{strings.TrimSpace(remark)}
 	switch {
-	case isEmpty(trimmedRemark):
-		return responseToEmpty
-	case isYellingQuestion(trimmedRemark):
+	case r.isSilence():
+		return responseToSilence
+	case r.isYelledQuestion():
 		return responseToYellingQuestion
-	case isYelling(trimmedRemark):
+	case r.isYelling():
 		return responseToYelling
-	case isQuestion(trimmedRemark):
+	case r.isQuestion():
 		return responseToQuestion
 	default:
 		return response
 	}
 }
 
-func isYellingQuestion(trimmedRemark string) bool {
-	return isYelling(trimmedRemark) && isQuestion(trimmedRemark)
+// Remark is the comment made to bob
+type Remark struct{ remark string }
+
+func (r Remark) isYelledQuestion() bool {
+	return r.isYelling() && r.isQuestion()
 }
 
-func isEmpty(trimmedRemark string) bool {
-	return trimmedRemark == ""
+func (r Remark) isSilence() bool {
+	return r.remark == ""
 }
 
-func isQuestion(remark string) bool {
-	return strings.HasSuffix(remark, "?")
+func (r Remark) isQuestion() bool {
+	return strings.HasSuffix(r.remark, "?")
 }
 
-func isYelling(remark string) bool {
-	return remark == strings.ToUpper(remark) && remark != strings.ToLower(remark)
+func (r Remark) isYelling() bool {
+	matchesUpper := r.remark == strings.ToUpper(r.remark)
+	matchesLower := r.remark == strings.ToLower(r.remark)
+	return matchesUpper && !matchesLower
 }
