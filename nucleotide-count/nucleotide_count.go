@@ -1,6 +1,8 @@
 package dna
 
-import "errors"
+import (
+	"fmt"
+)
 
 // Histogram is a mapping from nucleotide to its count in given DNA.
 type Histogram map[byte]int
@@ -12,11 +14,11 @@ type DNA []byte
 // Returns an error if d contains an invalid nucleotide.
 func (d DNA) Counts() (Histogram, error) {
 	h := Histogram{'A': 0, 'C': 0, 'G': 0, 'T': 0}
-	for _, b := range d {
-		if _, ok := h[b]; !ok {
-			return nil, errors.New("invalid nucleotide")
+	for _, nucleotide := range d {
+		if _, ok := h[nucleotide]; !ok {
+			return nil, fmt.Errorf("invalid nucleotide %v", nucleotide)
 		}
-		h[b]++
+		h[nucleotide]++
 	}
 	return h, nil
 }
