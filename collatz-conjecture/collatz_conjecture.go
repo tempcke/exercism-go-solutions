@@ -17,10 +17,10 @@ func collatz(n, i int) int {
 	if n == 1 {
 		return i
 	}
-	return collatz(changeN(n), i+1)
+	return collatz(nextN(n), i+1)
 }
 
-func changeN(n int) int {
+func nextN(n int) int {
 	if n%2 == 0 {
 		return n / 2
 	}
