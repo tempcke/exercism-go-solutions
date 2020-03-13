@@ -13,5 +13,5 @@ func SumOfSquares(n int) int {
 
 // Difference subtracts the SquareOfSum from the SumOfSquares to find the difference
 func Difference(n int) int {
-	return (n * (3*n + 2) * (n - 1) * (n + 1)) / 12
+	return SquareOfSum(n) - SumOfSquares(n)
 }
