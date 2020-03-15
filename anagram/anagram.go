@@ -1,36 +1,62 @@
 package anagram
 
 import (
-	"sort"
 	"strings"
+	"unicode"
 )
 
 // Detect which candidates are an anagram of the provided subject
-func Detect(subject string, candidates []string) []string {
-	subject = strings.ToLower(subject)
+func Detect(s string, candidates []string) []string {
+	s = strings.ToLower(s)
+	sMap := letterMap(s)
+	matching := make([]string, len(candidates))
+	var i int
 
-	match := make([]string, 0, len(candidates))
-	sortedSubject := sortedString(subject)
-
-	for _, c := range candidates {
-		if subject == strings.ToLower(c) {
+	for _, candidate := range candidates {
+		c := strings.ToLower(candidate)
+		if !isPossibleMatch(s, c) {
 			continue
 		}
-		if sortedString(c) == sortedSubject {
-			match = append(match, c)
+		if !isExactMatch(letterMap(c), sMap) {
+			continue
+		}
+		matching[i] = candidate
+		i++
+	}
+
+	return matching[0:i]
+}
+
+func isPossibleMatch(a, b string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	if a == b {
+		return false
+	}
+	return true
+}
+
+func letterMap(input string) []int {
+	chars := make([]int, 26)
+	for _, c := range input {
+		if !unicode.IsLetter(c) {
+			continue
+		}
+		c = unicode.ToLower(c)
+		chars[c-'a']++
+	}
+	return chars
+}
+
+func isExactMatch(a, b []int) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
 		}
 	}
-	return match
+	return true
 }
-
-func sortedString(input string) string {
-	s := sortRunes([]rune(strings.ToLower(input)))
-	sort.Sort(s)
-	return string(s)
-}
-
-type sortRunes []rune
-
-func (s sortRunes) Len() int           { return len(s) }
-func (s sortRunes) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
-func (s sortRunes) Less(i, j int) bool { return s[i] < s[j] }
