@@ -2,22 +2,25 @@ package luhn
 
 // Valid checks if the input string is valid luhn
 func Valid(input string) bool {
-	runes := []rune(input)
-	var sum, count int32
+	sum, count := check([]rune(input))
 
+	return count > 1 && sum%10 == 0
+}
+
+func check(runes []rune) (sum, count int32) {
 	for i := len(runes) - 1; i >= 0; i-- {
 		r := runes[i]
 		if r == ' ' {
 			continue
 		}
 		if !isNum(r) {
-			return false
+			return 0, 0
 		}
 
 		sum += modVal(r-'0', count)
 		count++
 	}
-	return count > 1 && sum%10 == 0
+	return sum, count
 }
 
 func isNum(r rune) bool {
