@@ -3,20 +3,19 @@ package luhn
 // Valid checks if the input string is valid luhn
 func Valid(input string) bool {
 	runes := []rune(input)
-	length := len(runes)
 	var sum, count int32
 
-	for i := 0; i < length; i++ {
-		r := runes[length-i-1]
-		switch {
-		default:
-			return false
-		case r == ' ':
+	for i := len(runes) - 1; i >= 0; i-- {
+		r := runes[i]
+		if r == ' ' {
 			continue
-		case isNum(r):
-			sum += modVal(r-'0', count)
-			count++
 		}
+		if !isNum(r) {
+			return false
+		}
+
+		sum += modVal(r-'0', count)
+		count++
 	}
 	return count > 1 && sum%10 == 0
 }
