@@ -27,16 +27,6 @@ func Detect(s string, candidates []string) []string {
 	return matching[0:i]
 }
 
-func isPossibleMatch(a, b string) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	if a == b {
-		return false
-	}
-	return true
-}
-
 func letterMap(input string) []int {
 	chars := make([]int, 26)
 	for _, c := range input {
@@ -47,6 +37,16 @@ func letterMap(input string) []int {
 		chars[c-'a']++
 	}
 	return chars
+}
+
+func isPossibleMatch(a, b string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	if a == b {
+		return false
+	}
+	return true
 }
 
 func isExactMatch(a, b []int) bool {
