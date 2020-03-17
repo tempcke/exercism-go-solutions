@@ -15,7 +15,6 @@ type cryptoSquare struct {
 	runeCount int
 	rowCount  int
 	codeLen   int
-	encoded   []rune
 }
 
 func (c *cryptoSquare) encode(s string) string {
