@@ -2,43 +2,67 @@ package cryptosquare
 
 import (
 	"math"
-	"strings"
 	"unicode"
 )
 
-func Encode(pt string) string {
-	s := normalize(pt)
-	if len(s) <= 1 { return s }
-	rowCount := rowCount(s)
-	rows := make([]string, rowCount)
-	for i, r := range s {
-		row := i
-		for row >= rowCount {
-			row -= rowCount
-		}
-		rows[row] += string(r)
-	}
-
-	remainder := len(s) % rowCount
-	if remainder > 0 {
-		pad := rowCount - remainder
-		for i := 0; i < pad; i++ {
-			rows[rowCount-1-i] += " "
-		}
-	}
-	return strings.Join(rows, " ")
+// Encode converts a given string into square code
+func Encode(s string) string {
+	return new(cryptoSquare).encode(s)
 }
 
-func normalize(input string) (s string) {
+type cryptoSquare struct {
+	runes     []rune
+	runeCount int
+	rowCount  int
+	codeLen   int
+	encoded   []rune
+}
+
+func (c *cryptoSquare) encode(s string) string {
+	c.runes = c.normalize(s)
+	c.runeCount = len(c.runes)
+
+	if c.runeCount <= 1 {
+		return string(c.runes)
+	}
+
+	c.solveDementions()
+
+	encoded := make([]rune, c.codeLen)
+	for i := 0; i < c.codeLen; i++ {
+		encoded[i] = c.runeForPos(i)
+	}
+
+	return string(encoded)
+}
+
+func (c *cryptoSquare) normalize(input string) []rune {
+	runes := make([]rune, len(input))
+	var i int
 	for _, r := range input {
-		if !unicode.IsLetter(r) && !unicode.IsDigit(r) {
-			continue
+		if unicode.IsLetter(r) || unicode.IsDigit(r) {
+			runes[i] = unicode.ToLower(r)
+			i++
 		}
-		s += string(unicode.ToLower(r))
 	}
-	return s
+	return runes[0:i]
 }
 
-func rowCount(s string) int {
-	return int(math.Ceil(math.Sqrt(float64(len(s)))))
+func (c *cryptoSquare) solveDementions() {
+	l := float64(c.runeCount)
+	height := math.Ceil(math.Sqrt(l))
+	width := math.Ceil(l / height)
+	c.rowCount = int(height)
+	c.codeLen = int(((width + 1) * height) - 1)
+}
+
+func (c *cryptoSquare) runeForPos(i int) rune {
+	pos := i * c.rowCount
+	for pos > c.codeLen {
+		pos -= c.codeLen
+	}
+	if pos >= c.runeCount {
+		return ' '
+	}
+	return c.runes[pos]
 }
