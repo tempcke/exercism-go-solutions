@@ -1,6 +1,8 @@
 package cryptosquare
 
-import "testing"
+import (
+	"testing"
+)
 
 var tests = []struct {
 	pt string // plain text
@@ -81,7 +83,7 @@ var tests = []struct {
 	{
 		"Have a nice day. Feed the dog & chill out!",
 		"hifei acedl veeol eddgo aatcu nyhht",
-	},
+	}, {"日本語a b c", "日a 本b 語c"},
 }
 
 func TestEncode(t *testing.T) {
