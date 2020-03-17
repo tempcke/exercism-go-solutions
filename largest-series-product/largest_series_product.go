@@ -8,26 +8,34 @@ import (
 // LargestSeriesProduct will calculate the largest product for a contiguous substring of digits
 func LargestSeriesProduct(strDigits string, span int) (int64, error) {
 	digits := []rune(strDigits)
-	if len(digits) < span {
-		return 0, errors.New("span must be smaller than string length")
-	}
-	if span < 0 {
-		return 0, errors.New("span must be greater than zero")
+
+	if err := validate(digits, span); err != nil {
+		return 0, err
 	}
 
-	var p int64
+	var largestProduct int64
 
 	for i := 0; i+span <= len(digits); i++ {
-		a, err := product(digits[i : i+span])
+		p, err := product(digits[i : i+span])
 		if err != nil {
 			return 0, err
 		}
-		if a > p {
-			p = a
+		if p > largestProduct {
+			largestProduct = p
 		}
 	}
 
-	return p, nil
+	return largestProduct, nil
+}
+
+func validate(digits []rune, span int) error {
+	if len(digits) < span {
+		return errors.New("span must be smaller than string length")
+	}
+	if span < 0 {
+		return errors.New("span must be greater than zero")
+	}
+	return nil
 }
 
 func product(digits []rune) (int64, error) {
