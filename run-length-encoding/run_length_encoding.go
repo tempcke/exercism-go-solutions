@@ -1,6 +1,9 @@
 package encode
 
-import "strconv"
+import (
+	"strconv"
+	"unicode"
+)
 
 // RunLengthEncode Run-length encoding (RLE) is a simple form of data compression, where runs
 // (consecutive data elements) are replaced by just one data value and count.
@@ -36,5 +39,34 @@ func encodeRune(r rune, count int) string {
 
 // RunLengthDecode decodes a run-length encoded string
 func RunLengthDecode(input string) string {
-	return ""
+	runes := []rune(input)
+	var decoded, run string
+	for i := 0; i < len(runes); {
+		run, i = decodedRuneRun(runes, i)
+		decoded += run
+	}
+	return decoded
+}
+
+func decodedRuneRun(runes []rune, i int) (string, int) {
+	if unicode.IsDigit(runes[i]) {
+		digits := make([]rune, 0, 3)
+		for j := i; j < len(runes); j++ {
+			r := runes[j]
+			if !unicode.IsDigit(r) {
+				count, _ := strconv.Atoi(string(digits))
+				return runeRun(r, count), j + 1
+			}
+			digits = append(digits, r)
+		}
+	}
+	return string(runes[i : i+1]), i + 1
+}
+
+func runeRun(r rune, count int) string {
+	runes := make([]rune, count)
+	for i := 0; i < count; i++ {
+		runes[i] = r
+	}
+	return string(runes)
 }
