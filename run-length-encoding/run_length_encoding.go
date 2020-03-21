@@ -2,20 +2,21 @@ package encode
 
 import (
 	"strconv"
+	"strings"
 	"unicode"
 )
 
 // RunLengthEncode Run-length encoding (RLE) is a simple form of data compression, where runs
 // (consecutive data elements) are replaced by just one data value and count.
 func RunLengthEncode(input string) string {
-	var encoded string
+	var encoded strings.Builder
 	runes := []rune(input)
 	for i := 0; i < len(runes); {
 		r, n := runeRunLength(runes, i)
-		encoded += encodeRune(r, n)
+		encoded.WriteString(encodeRune(r, n))
 		i += n
 	}
-	return string(encoded)
+	return encoded.String()
 }
 
 func runeRunLength(runes []rune, i int) (rune, int) {
@@ -40,33 +41,50 @@ func encodeRune(r rune, count int) string {
 // RunLengthDecode decodes a run-length encoded string
 func RunLengthDecode(input string) string {
 	runes := []rune(input)
-	var decoded, run string
+	var run string
+	var decoded strings.Builder
 	for i := 0; i < len(runes); {
+		// get the string run and the new pos for i
 		run, i = decodedRuneRun(runes, i)
-		decoded += run
+		decoded.WriteString(run)
 	}
-	return decoded
+	return decoded.String()
 }
 
+// decodeRuneRune finds the next set of repeated runes
+// if the first rune is not a digit it is returned with i++
+// else it collects the rune digits and repeats the first non digit run
 func decodedRuneRun(runes []rune, i int) (string, int) {
-	if unicode.IsDigit(runes[i]) {
-		digits := make([]rune, 0, 3)
-		for j := i; j < len(runes); j++ {
-			r := runes[j]
-			if !unicode.IsDigit(r) {
-				count, _ := strconv.Atoi(string(digits))
-				return runeRun(r, count), j + 1
-			}
-			digits = append(digits, r)
+	numLen := numLength(runes[i:])
+	j := i + numLen
+	r := runes[j]
+	if numLen == 0 { // no digits, so just return the next rune
+		return string(r), i + 1
+	}
+	count := runeDigitsToInt(runes[i:j])
+	return runeRepeat(r, count), j + 1
+}
+
+// numLength returns the number of consecutive runes which are digits
+func numLength(runes []rune) int {
+	for i, r := range runes {
+		if !unicode.IsDigit(r) {
+			// i is the index of the first non-digit rune
+			// therefore it is also the number of consecutive digits
+			return i
 		}
 	}
-	return string(runes[i : i+1]), i + 1
+	// for this exercise this should never happen
+	// this means that all the runes where digits...
+	return len(runes)
 }
 
-func runeRun(r rune, count int) string {
-	runes := make([]rune, count)
-	for i := 0; i < count; i++ {
-		runes[i] = r
-	}
-	return string(runes)
+func runeDigitsToInt(num []rune) int {
+	strnum := string(num)
+	n, _ := strconv.Atoi(strnum)
+	return n
+}
+
+func runeRepeat(r rune, count int) string {
+	return strings.Repeat(string(r), count)
 }
