@@ -13,7 +13,7 @@ func luhnSum(runes []rune) (sum, count int32) {
 		if r == ' ' {
 			continue
 		}
-		if !isNum(r) {
+		if r < '0' || r > '9' {
 			return 0, 0
 		}
 
@@ -21,10 +21,6 @@ func luhnSum(runes []rune) (sum, count int32) {
 		count++
 	}
 	return sum, count
-}
-
-func isNum(r rune) bool {
-	return '0' <= r && r <= '9'
 }
 
 func modVal(value, count int32) int32 {
