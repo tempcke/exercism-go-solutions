@@ -10,15 +10,16 @@ func Valid(input string) bool {
 		return false
 	}
 
-	var sum int32
+	var sum int
 	var change bool = len(input)%2 == 0
 
 	for _, r := range input {
-		if r < '0' || r > '9' {
+
+		v := int(r - '0')
+
+		if v < 0 || v > 9 {
 			return false
 		}
-
-		v := r - '0'
 
 		if change {
 			v *= 2
