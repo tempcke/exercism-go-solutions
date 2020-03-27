@@ -18,28 +18,18 @@ func Valid(input string) bool {
 			return false
 		}
 
-		// v := r - '0'
+		v := r - '0'
 
-		// if change {
-		// 	v *= 2
-		// 	if v > 9 {
-		// 		v -= 9
-		// 	}
-		// }
+		if change {
+			v *= 2
+			if v > 9 {
+				v -= 9
+			}
+		}
 
-		sum += getValue(r-'0', change)
+		sum += v
 		change = !change
 	}
 
 	return sum%10 == 0
-}
-
-func getValue(v int32, change bool) int32 {
-	if change {
-		if v > 4 {
-			return 2*v - 9
-		}
-		return 2 * v
-	}
-	return v
 }
