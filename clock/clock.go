@@ -8,11 +8,18 @@ const (
 	minsPerDay = 1440
 )
 
-// Clock is minutes 0 to 1440
-type Clock int
+// Clock contains hour and minute
+type Clock struct {
+	hour, min int
+}
 
 // New Clock
 func New(hour, minute int) Clock {
+	m := toMins(hour, minute)
+	return Clock{m / minsPerHr, m % minsPerHr}
+}
+
+func toMins(hour, minute int) int {
 	for minute < 0 {
 		hour--
 		minute += minsPerHr
@@ -24,7 +31,7 @@ func New(hour, minute int) Clock {
 		minute = minute % minsPerDay
 	}
 
-	return Clock(minute)
+	return minute
 }
 
 func fixHour(h int) int {
@@ -37,15 +44,15 @@ func fixHour(h int) int {
 
 // String of a Clock hh:mm
 func (c Clock) String() string {
-	return fmt.Sprintf("%02d:%02d", c/minsPerHr, c%minsPerHr)
+	return fmt.Sprintf("%02d:%02d", c.hour, c.min)
 }
 
 // Add minutes to a Clock
 func (c Clock) Add(minutes int) Clock {
-	return New(0, int(c)+minutes)
+	return New(c.hour, c.min+minutes)
 }
 
 // Subtract minutes from a Clock
 func (c Clock) Subtract(minutes int) Clock {
-	return New(0, int(c)-minutes)
+	return New(c.hour, c.min-minutes)
 }
