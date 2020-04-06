@@ -1,7 +1,6 @@
 package letter
 
 import (
-	"fmt"
 	"sync"
 )
 
@@ -16,12 +15,6 @@ func Frequency(s string) FreqMap {
 		m[r]++
 	}
 	return m
-}
-
-func runeCtr(c chan<- rune, s string) {
-	for _, r := range s {
-		c <- r
-	}
 }
 
 // ConcurrentFrequency counts the frequency of each rune in all strings
@@ -41,16 +34,16 @@ func ConcurrentFrequency(strings []string) FreqMap {
 
 	for _, s := range strings {
 		wg.Add(1)
-		go func(c chan rune) {
-			runeCtr(c, s)
+		go func(s string) {
+			for _, r := range s {
+				c <- r
+			}
 			wg.Done()
-		}(c)
+		}(s)
 	}
 
 	wg.Wait()
 	close(c)
-
-	fmt.Printf("%v", m)
 
 	return m
 
