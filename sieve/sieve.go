@@ -10,7 +10,7 @@ func Sieve(limit int) []int {
 	for i := 2; i <= limit; i++ {
 		if !s[i] {
 			p = append(p, i)
-			for j := i; j <= int(limit/i); j++ {
+			for j := i; i*j <= limit; j++ {
 				s[i*j] = true
 			}
 		}
