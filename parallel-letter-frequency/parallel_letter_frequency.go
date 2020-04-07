@@ -20,63 +20,34 @@ func Frequency(s string) FreqMap {
 // ConcurrentFrequency counts the frequency of each rune in all strings
 // processing each string in parallel
 func ConcurrentFrequency(strings []string) FreqMap {
-
 	c := make(chan FreqMap)
+	defer close(c)
+
 	m := FreqMap{}
 
+	// wait for len(strings) processes to finish
+	var wg sync.WaitGroup
+	wg.Add(len(strings))
+
+	// listen for new maps on chan
+	// add them to our master map
 	go func() {
 		for freqMap := range c {
 			for r, n := range freqMap {
 				m[r] += n
 			}
+			wg.Done()
 		}
 	}()
 
-	var wg sync.WaitGroup
-	wg.Add(len(strings))
-
+	// for each string create a process to feed the FreqMap
+	// into the channel then mark the process done
 	for _, s := range strings {
 		go func(s string) {
 			c <- Frequency(s)
-			wg.Done()
 		}(s)
 	}
 
 	wg.Wait()
-	close(c)
-
 	return m
-
 }
-
-// // ConcurrentFrequency counts the frequency of each rune in all strings
-// // processing each string in parallel
-// func ConcurrentFrequency(strings []string) FreqMap {
-
-// 	var wg sync.WaitGroup
-
-// 	c := make(chan rune)
-
-// 	m := FreqMap{}
-// 	go func() {
-// 		for r := range c {
-// 			m[r]++
-// 		}
-// 	}()
-
-// 	for _, s := range strings {
-// 		wg.Add(1)
-// 		go func(s string) {
-// 			for _, r := range s {
-// 				c <- r
-// 			}
-// 			wg.Done()
-// 		}(s)
-// 	}
-
-// 	wg.Wait()
-// 	close(c)
-
-// 	return m
-
-// }
