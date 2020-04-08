@@ -2,18 +2,17 @@ package sieve
 
 // Sieve of Eratosthenes to find all the primes from 2 up to a given number
 func Sieve(limit int) []int {
-	s := make([]bool, limit+1)
-	p := make([]int, 0, limit)
-
-	s[0], s[1] = true, true
+	marked := make([]bool, limit+1)
+	primes := make([]int, 0, limit/2)
 
 	for i := 2; i <= limit; i++ {
-		if !s[i] {
-			p = append(p, i)
-			for j := i; i*j <= limit; j++ {
-				s[i*j] = true
-			}
+		if marked[i] {
+			continue
+		}
+		primes = append(primes, i)
+		for mult := i * 2; mult <= limit; mult += i {
+			marked[mult] = true
 		}
 	}
-	return p
+	return primes
 }
