@@ -37,10 +37,7 @@ func Build(records []Record) (*Node, error) {
 	}
 
 	// append child nodes
-	for _, r := range records {
-		if r.ID == 0 { // root node
-			continue
-		}
+	for _, r := range records[1:] {
 		p := nodes[r.Parent]
 		p.Children = append(p.Children, nodes[r.ID])
 	}
