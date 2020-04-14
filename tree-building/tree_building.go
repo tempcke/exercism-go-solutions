@@ -34,10 +34,14 @@ func Build(records []Record) (*Node, error) {
 			return nil, err
 		}
 		nodes[r.ID] = &Node{ID: r.ID}
-	}
 
-	// append child nodes
-	for _, r := range records[1:] {
+		if r.ID == 0 {
+			continue
+		}
+
+		// append child
+		// works only because the records are sorted
+		// and rule: node can not be child of a higher id parent
 		p := nodes[r.Parent]
 		p.Children = append(p.Children, nodes[r.ID])
 	}
