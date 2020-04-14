@@ -27,23 +27,19 @@ func Build(records []Record) (*Node, error) {
 		return records[i].ID < records[j].ID
 	})
 
-	// build node map
 	nodes := make(map[int]*Node, len(records))
 	for i, r := range records {
 		if err := recordCheck(r, i); err != nil {
 			return nil, err
 		}
-		nodes[r.ID] = &Node{ID: r.ID}
 
-		if r.ID == 0 {
-			continue
+		node := &Node{ID: r.ID}
+		nodes[r.ID] = node
+
+		if r.ID != 0 {
+			parentNode := nodes[r.Parent]
+			parentNode.Children = append(parentNode.Children, node)
 		}
-
-		// append child
-		// works only because the records are sorted
-		// and rule: node can not be child of a higher id parent
-		p := nodes[r.Parent]
-		p.Children = append(p.Children, nodes[r.ID])
 	}
 
 	return nodes[0], nil
