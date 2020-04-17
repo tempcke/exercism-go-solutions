@@ -144,6 +144,7 @@ var successTestCases = []struct {
 var failureTestCases = []struct {
 	name  string
 	input []Record
+	err   error
 }{
 	{
 		name: "root node has parent",
@@ -151,6 +152,7 @@ var failureTestCases = []struct {
 			{ID: 0, Parent: 1},
 			{ID: 1, Parent: 0},
 		},
+		err: ErrorRootHasParent,
 	},
 	{
 		name: "no root node",
@@ -165,6 +167,7 @@ var failureTestCases = []struct {
 			{ID: 1, Parent: 0},
 			{ID: 1, Parent: 0},
 		},
+		err: ErrorNonContinuous,
 	},
 	{
 		name: "duplicate root",
@@ -181,30 +184,16 @@ var failureTestCases = []struct {
 			{ID: 1, Parent: 0},
 			{ID: 0},
 		},
+		err: ErrorNonContinuous,
 	},
 	{
 		name: "cycle directly",
 		input: []Record{
-			{ID: 5, Parent: 2},
-			{ID: 3, Parent: 2},
 			{ID: 2, Parent: 2},
-			{ID: 4, Parent: 1},
 			{ID: 1, Parent: 0},
 			{ID: 0},
-			{ID: 6, Parent: 3},
 		},
-	},
-	{
-		name: "cycle indirectly",
-		input: []Record{
-			{ID: 5, Parent: 2},
-			{ID: 3, Parent: 2},
-			{ID: 2, Parent: 6},
-			{ID: 4, Parent: 1},
-			{ID: 1, Parent: 0},
-			{ID: 0},
-			{ID: 6, Parent: 3},
-		},
+		err: ErrorSelfParenting,
 	},
 	{
 		name: "higher id parent of lower id",
@@ -213,6 +202,7 @@ var failureTestCases = []struct {
 			{ID: 2, Parent: 0},
 			{ID: 1, Parent: 2},
 		},
+		err: ErrorParentHasHigherID,
 	},
 }
 
@@ -222,26 +212,33 @@ func (n Node) String() string {
 
 func TestMakeTreeSuccess(t *testing.T) {
 	for _, tt := range successTestCases {
-		actual, err := Build(tt.input)
-		if err != nil {
-			var _ error = err
-			t.Fatalf("Build for test case %q returned error %q. Error not expected.",
-				tt.name, err)
-		}
-		if !reflect.DeepEqual(actual, tt.expected) {
-			t.Fatalf("Build for test case %q returned %s but was expected to return %s.",
-				tt.name, actual, tt.expected)
-		}
+		t.Run(tt.name, func(t *testing.T) {
+			actual, err := Build(tt.input)
+			if err != nil {
+				var _ error = err
+				t.Fatalf("Build for test case %q returned error %q. Error not expected.",
+					tt.name, err)
+			}
+			if !reflect.DeepEqual(actual, tt.expected) {
+				t.Fatalf("Build for test case %q returned %s but was expected to return %s.",
+					tt.name, actual, tt.expected)
+			}
+		})
 	}
 }
 
 func TestMakeTreeFailure(t *testing.T) {
 	for _, tt := range failureTestCases {
-		actual, err := Build(tt.input)
-		if err == nil {
-			t.Fatalf("Build for test case %q returned %s but was expected to fail.",
-				tt.name, actual)
-		}
+		t.Run(tt.name, func(t *testing.T) {
+			actual, err := Build(tt.input)
+			if err == nil {
+				t.Fatalf("Build for test case %q returned %s but was expected to fail.",
+					tt.name, actual)
+			}
+			if tt.err != nil && err != tt.err {
+				t.Fatalf("Expected error: %v\n Got error: %v", tt.err, err)
+			}
+		})
 	}
 }
 

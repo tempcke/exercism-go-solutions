@@ -1,7 +1,7 @@
 package tree
 
 import (
-	"fmt"
+	"errors"
 	"sort"
 )
 
@@ -16,6 +16,20 @@ type Node struct {
 	ID       int
 	Children []*Node
 }
+
+var (
+	// ErrorRootHasParent root parent can not be >= 1
+	ErrorRootHasParent = errors.New("root node must not have a parent")
+
+	// ErrorNonContinuous root node must be zero with no duplicates and no gaps in the rest
+	ErrorNonContinuous = errors.New("Nodes must be continuous")
+
+	// ErrorParentHasHigherID parentID must not be greater than child id
+	ErrorParentHasHigherID = errors.New("node can not be child of a higher id parent")
+
+	// ErrorSelfParenting other than root childID must not equal parentID
+	ErrorSelfParenting = errors.New("record can not have itself as parent")
+)
 
 // Build the tree
 func Build(records []Record) (*Node, error) {
@@ -46,16 +60,20 @@ func Build(records []Record) (*Node, error) {
 }
 
 func recordCheck(r Record, i int) error {
+	if r.ID == 0 && r.Parent != 0 {
+		return ErrorRootHasParent
+	}
+
 	if r.ID > 0 && r.ID == r.Parent {
-		return fmt.Errorf("record can not have itself as parent: %v", r)
+		return ErrorSelfParenting
 	}
 
 	if r.Parent > r.ID {
-		return fmt.Errorf("node can not be child of a higher id parent: %v", r)
+		return ErrorParentHasHigherID
 	}
 
 	if r.ID != i {
-		return fmt.Errorf("non-continuous: %v", r.ID)
+		return ErrorNonContinuous
 	}
 
 	return nil
