@@ -1,13 +1,15 @@
 package robotname
 
 import (
+	"errors"
 	"math/rand"
 	"time"
 )
 
 const (
-	nameLetters = 2
-	nameLength  = 5
+	nameLetters   = 2
+	nameLength    = 5
+	possibleCount = 26 * 26 * 10 * 10 * 10
 )
 
 var usedNames = map[string]bool{}
@@ -19,24 +21,31 @@ type Robot struct {
 
 // Reset the robots name
 func (r *Robot) Reset() {
-	r.name = genName()
+	r.name, _ = genName()
 }
 
 // Name of the robot
 func (r *Robot) Name() (string, error) {
 	if r.name == "" {
-		r.name = genName()
+		name, err := genName()
+		if err != nil {
+			return "", err
+		}
+		r.name = name
 	}
 	return r.name, nil
 }
 
-func genName() string {
+func genName() (string, error) {
+	if len(usedNames) == possibleCount {
+		return "", errors.New("possible names exausted")
+	}
 	strName := randName()
 	for usedNames[strName] {
 		strName = randName()
 	}
 	usedNames[strName] = true
-	return strName
+	return strName, nil
 }
 
 func randName() string {
