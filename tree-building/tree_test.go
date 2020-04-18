@@ -141,78 +141,60 @@ var successTestCases = []struct {
 	},
 }
 
+// Rules:
+// 1. The ID number is always between 0 (inclusive) and the length of the record list (exclusive).
+//    - lowest record must always be 0
+//    - all ID's in range must be used, no gaps
+//    - each record id must be unique
+// 2. All records have a parent ID lower than their own ID, except for the root record, which has a parent ID that's equal to its own ID.
+//    - record zero's parent must also be zero
+//    - all other records must have a parent id lower than their own id
+
 var failureTestCases = []struct {
 	name  string
 	input []Record
+	err   error
 }{
 	{
-		name: "root node has parent",
-		input: []Record{
-			{ID: 0, Parent: 1},
-			{ID: 1, Parent: 0},
-		},
-	},
-	{
-		name: "no root node",
+		name: "lowest record must always be zero",
 		input: []Record{
 			{ID: 1, Parent: 0},
 		},
+		err: ErrorBadRootRecord,
 	},
 	{
-		name: "duplicate node",
-		input: []Record{
-			{ID: 0, Parent: 0},
-			{ID: 1, Parent: 0},
-			{ID: 1, Parent: 0},
-		},
-	},
-	{
-		name: "duplicate root",
-		input: []Record{
-			{ID: 0, Parent: 0},
-			{ID: 0, Parent: 0},
-		},
-	},
-	{
-		name: "non-continuous",
-		input: []Record{
-			{ID: 2, Parent: 0},
-			{ID: 4, Parent: 2},
-			{ID: 1, Parent: 0},
-			{ID: 0},
-		},
-	},
-	{
-		name: "cycle directly",
-		input: []Record{
-			{ID: 5, Parent: 2},
-			{ID: 3, Parent: 2},
-			{ID: 2, Parent: 2},
-			{ID: 4, Parent: 1},
-			{ID: 1, Parent: 0},
-			{ID: 0},
-			{ID: 6, Parent: 3},
-		},
-	},
-	{
-		name: "cycle indirectly",
-		input: []Record{
-			{ID: 5, Parent: 2},
-			{ID: 3, Parent: 2},
-			{ID: 2, Parent: 6},
-			{ID: 4, Parent: 1},
-			{ID: 1, Parent: 0},
-			{ID: 0},
-			{ID: 6, Parent: 3},
-		},
-	},
-	{
-		name: "higher id parent of lower id",
+		name: "no gaps in record ID's",
 		input: []Record{
 			{ID: 0},
 			{ID: 2, Parent: 0},
+		},
+		err: ErrorNonContinuous,
+	},
+	{
+		name: "each record id must be unique",
+		input: []Record{
+			{ID: 0},
+			{ID: 1, Parent: 0},
+			{ID: 2, Parent: 0},
+			{ID: 2, Parent: 1},
+		},
+		err: ErrorNonContinuous,
+	},
+	{
+		name: "root's parent must be zero",
+		input: []Record{
+			{ID: 0, Parent: -1},
+		},
+		err: ErrorBadRootRecord,
+	},
+	{
+		name: "non zero records must have lower ID parent",
+		input: []Record{
+			{ID: 0},
 			{ID: 1, Parent: 2},
+			{ID: 2, Parent: 0},
 		},
+		err: ErrorBadParentID,
 	},
 }
 
@@ -222,26 +204,28 @@ func (n Node) String() string {
 
 func TestMakeTreeSuccess(t *testing.T) {
 	for _, tt := range successTestCases {
-		actual, err := Build(tt.input)
-		if err != nil {
-			var _ error = err
-			t.Fatalf("Build for test case %q returned error %q. Error not expected.",
-				tt.name, err)
-		}
-		if !reflect.DeepEqual(actual, tt.expected) {
-			t.Fatalf("Build for test case %q returned %s but was expected to return %s.",
-				tt.name, actual, tt.expected)
-		}
+		t.Run(tt.name, func(t *testing.T) {
+			actual, err := Build(tt.input)
+			if err != nil {
+				var _ error = err
+				t.Fatalf("Build for test case %q returned error %q. Error not expected.",
+					tt.name, err)
+			}
+			if !reflect.DeepEqual(actual, tt.expected) {
+				t.Fatalf("Build for test case %q returned %s but was expected to return %s.",
+					tt.name, actual, tt.expected)
+			}
+		})
 	}
 }
 
 func TestMakeTreeFailure(t *testing.T) {
 	for _, tt := range failureTestCases {
-		actual, err := Build(tt.input)
-		if err == nil {
-			t.Fatalf("Build for test case %q returned %s but was expected to fail.",
-				tt.name, actual)
-		}
+		t.Run(tt.name, func(t *testing.T) {
+			if _, err := Build(tt.input); err != tt.err {
+				t.Fatalf("Expected error: %v\n Got error: %v", tt.err, err)
+			}
+		})
 	}
 }
 
