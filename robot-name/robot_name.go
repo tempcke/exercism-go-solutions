@@ -18,17 +18,19 @@ type Robot struct {
 
 // Name of the robot
 func (r *Robot) Name() (string, error) {
-	if r.name == "" {
-		if len(usedNames) == possibleCount {
-			return "", errors.New("possible names exausted")
-		}
-		strName := randName()
-		for usedNames[strName] {
-			strName = randName()
-		}
-		usedNames[strName] = true
-		r.name = strName
+	if r.name != "" {
+		return r.name, nil
 	}
+
+	if len(usedNames) == possibleCount {
+		return "", errors.New("possible names exhausted")
+	}
+
+	r.name = randName()
+	for usedNames[r.name] {
+		r.name = randName()
+	}
+	usedNames[r.name] = true
 	return r.name, nil
 }
 
@@ -38,20 +40,14 @@ func (r *Robot) Reset() {
 }
 
 func randName() string {
-	rand.Seed(time.Now().UnixNano())
 	return fmt.Sprintf(
-		"%c%c%c%c%c",
-		randLetter(),
-		randLetter(),
-		randDigit(),
-		randDigit(),
-		randDigit(),
+		"%s%s%03d",
+		string(rand.Intn(26)+'A'),
+		string(rand.Intn(26)+'A'),
+		rand.Intn(1000),
 	)
 }
 
-func randLetter() rune {
-	return 'A' + int32(rand.Intn(26))
-}
-func randDigit() rune {
-	return '0' + int32(rand.Intn(10))
+func init() {
+	rand.Seed(time.Now().UnixNano())
 }
