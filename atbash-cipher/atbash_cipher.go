@@ -27,7 +27,7 @@ func Atbash(s string) string {
 	for _, r := range s {
 		if c, ok := encode[r]; ok {
 			// every 6th char should be a space
-			if (sb.Len()+1)%6 == 0 {
+			if sb.Len()%6 == 5 {
 				sb.WriteRune(' ')
 			}
 			// append encoded rune
