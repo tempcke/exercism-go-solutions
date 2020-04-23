@@ -66,6 +66,7 @@ func Answer(question string) (answer int, ok bool) {
 		return a, true
 	}
 
+	// iterate next 2 fields at a time, operation and int
 	for i := 1; i < len(fields)-1; i += 2 {
 		op, ok := ops[fields[i]]
 		if !ok {
@@ -84,7 +85,7 @@ func Answer(question string) (answer int, ok bool) {
 func parseInt(input string) (n int, ok bool) {
 	n, err := strconv.Atoi(input)
 	if err != nil {
-		return
+		return 0, false
 	}
 	return n, true
 }
