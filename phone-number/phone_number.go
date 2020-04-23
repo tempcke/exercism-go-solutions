@@ -20,7 +20,6 @@ func Number(input string) (string, error) {
 	}
 
 	p := num.String()
-
 	if len(p) == 11 && p[0] == '1' {
 		p = p[1:]
 	}
@@ -28,10 +27,8 @@ func Number(input string) (string, error) {
 	switch {
 	case len(p) != 10:
 		return "", errors.New("Number must be 10, or 11 if it starts with 1")
-
 	case p[0] <= '1':
 		return "", errors.New("area code may not start with zero or one")
-
 	case p[3] <= '1':
 		return "", errors.New("exchange code may not start with zero or one")
 	}
