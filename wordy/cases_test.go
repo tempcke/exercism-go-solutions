@@ -150,4 +150,10 @@ var tests = []wordyTest{
 		false,
 		0,
 	},
+	{
+		"handle exponentials",
+		"What is 2 raised to the 5th power?",
+		true,
+		32,
+	},
 }
