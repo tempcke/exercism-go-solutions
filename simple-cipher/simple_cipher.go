@@ -25,7 +25,7 @@ func (c caesarCipher) Encode(s string) string {
 	i := 0
 	for _, r := range strings.ToLower(s) {
 		if r >= 'a' && r <= 'z' {
-			runes[i] = encodeRune(r, c.offset)
+			runes[i] = runeShift(r, c.offset)
 			i++
 		}
 	}
@@ -68,7 +68,7 @@ func (c vigenereCipher) Encode(s string) string {
 				n -= len(c.offsets)
 			}
 			offset := c.offsets[n]
-			runes[i] = encodeRune(r, int(offset))
+			runes[i] = runeShift(r, int(offset))
 			i++
 			n++
 		}
@@ -89,13 +89,8 @@ func newVigenereDecoder(encoderKey string) Cipher {
 	return vigenereCipher{key: encoderKey, offsets: offsets}
 }
 
-func encodeRune(r rune, offset int) rune {
-	o := int32(offset)
-	if r+o > 'z' { // encode alphabet wrap
-		return r + -1*('z'-'a'-o) - 1
-	}
-	if r+o < 'a' { // decode alphabet wrap
-		return r + 'z' - 'a' + o + 1
-	}
-	return r + o
+func runeShift(r rune, shift int) rune {
+	a := int('a') // 97 is the ascii value of the letter a
+	l := int(r)   // ascii value of rune
+	return rune(a + (26+l-a+shift)%26)
 }
