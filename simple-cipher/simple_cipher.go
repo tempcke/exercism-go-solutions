@@ -2,14 +2,14 @@ package cipher
 
 import "strings"
 
-// caesarCipher is a cipher style
+// shiftCipher is a cipher style
 type shiftCipher struct {
-	distance int
+	distance []int
 }
 
 // NewCaesar returns a caesar style cipher with a 3 char shift
 func NewCaesar() Cipher {
-	return shiftCipher{distance: 3}
+	return NewShift(3)
 }
 
 // NewShift returns a cipher with a custom shift
@@ -17,30 +17,7 @@ func NewShift(distance int) Cipher {
 	if distance >= 26 || distance <= -26 || distance == 0 {
 		return nil
 	}
-	return shiftCipher{distance: distance}
-}
-
-func (c shiftCipher) Encode(s string) string {
-	runes := make([]rune, len(s))
-	i := 0 // used to track only a-z chars
-	for _, r := range strings.ToLower(s) {
-		if r >= 'a' && r <= 'z' {
-			runes[i] = runeShift(r, c.distance)
-			i++
-		}
-	}
-	return string(runes[0:i])
-}
-
-func (c shiftCipher) Decode(s string) string {
-	// a decode is just an ecode with a negative shift...
-	decoder := NewShift(-1 * c.distance)
-	return decoder.Encode(s)
-}
-
-// vigenereCipher is a cipher style
-type vigenereCipher struct {
-	distance []int
+	return shiftCipher{distance: []int{distance}}
 }
 
 // NewVigenere defines a more complex cipher using a string as key value: a Vigenère cipher
@@ -55,10 +32,10 @@ func NewVigenere(key string) Cipher {
 		}
 		distances[i] = int(r - 'a')
 	}
-	return vigenereCipher{distance: distances}
+	return shiftCipher{distance: distances}
 }
 
-func (c vigenereCipher) Encode(s string) string {
+func (c shiftCipher) Encode(s string) string {
 	runes := make([]rune, len(s))
 	i, dCount := 0, len(c.distance)
 	for _, r := range strings.ToLower(s) {
@@ -70,12 +47,12 @@ func (c vigenereCipher) Encode(s string) string {
 	return string(runes[0:i])
 }
 
-func (c vigenereCipher) Decode(s string) string {
+func (c shiftCipher) Decode(s string) string {
 	distances := make([]int, len(c.distance))
 	for i, v := range c.distance {
 		distances[i] = -1 * v
 	}
-	decoder := vigenereCipher{distance: distances}
+	decoder := shiftCipher{distance: distances}
 	return decoder.Encode(s)
 }
 
