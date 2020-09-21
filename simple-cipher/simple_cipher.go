@@ -56,8 +56,8 @@ func (c shiftCipher) Decode(s string) string {
 	return decoder.Encode(s)
 }
 
-func runeShift(r rune, shift int) rune {
+func runeShift(r rune, distance int) rune {
 	a := int('a') // 97 is the ascii value of the letter a
 	l := int(r)   // ascii value of rune
-	return rune(a + (26+l-a+shift)%26)
+	return rune(a + (26+l-a+distance)%26)
 }
