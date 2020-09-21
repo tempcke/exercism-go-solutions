@@ -25,7 +25,7 @@ func (c caesarCipher) Encode(s string) string {
 	i := 0
 	for _, r := range strings.ToLower(s) {
 		if r >= 'a' && r <= 'z' {
-			runes[i] = r + c.offsetMod(r)
+			runes[i] = encodeRune(r, c.offset)
 			i++
 		}
 	}
@@ -33,36 +33,69 @@ func (c caesarCipher) Encode(s string) string {
 }
 
 func (c caesarCipher) Decode(s string) string {
-	c.offset *= -1
-	decoded := c.Encode(s)
-	c.offset *= -1
-	return decoded
-}
-
-func (c caesarCipher) offsetMod(r rune) int32 {
-	o := int32(c.offset)
-	if r+o > 'z' { // encode alphabet wrap
-		return -1*('z'-'a'-o) - 1
-	}
-	if r+o < 'a' { // decode alphabet wrap
-		return 'z' - 'a' + o + 1
-	}
-	return o
+	// a decode is just an ecode with a negative offset...
+	decoder := NewShift(-1 * c.offset)
+	return decoder.Encode(s)
 }
 
 // vigenereCipher is a cipher style
 type vigenereCipher struct {
-	key string
+	key     string
+	offsets []int
 }
 
 // NewVigenere defines a more complex cipher using a string as key value: a Vigenère cipher
 func NewVigenere(key string) Cipher {
-	return vigenereCipher{key: key}
+	if strings.Count(key, "a") == len(key) {
+		return nil
+	}
+	offsets := make([]int, len(key))
+	for i, r := range key {
+		if r < 'a' || r > 'z' {
+			return nil
+		}
+		offsets[i] = int(r - 'a')
+	}
+	return vigenereCipher{key: key, offsets: offsets}
 }
 
 func (c vigenereCipher) Encode(s string) string {
-	return ""
+	runes := make([]rune, len(s))
+	i, n := 0, 0
+	for _, r := range strings.ToLower(s) {
+		if r >= 'a' && r <= 'z' {
+			if n == len(c.offsets) {
+				n -= len(c.offsets)
+			}
+			offset := c.offsets[n]
+			runes[i] = encodeRune(r, int(offset))
+			i++
+			n++
+		}
+	}
+	return string(runes[0:i])
 }
+
 func (c vigenereCipher) Decode(s string) string {
-	return ""
+	decoder := newVigenereDecoder(c.key)
+	return decoder.Encode(s)
+}
+
+func newVigenereDecoder(encoderKey string) Cipher {
+	offsets := make([]int, len(encoderKey))
+	for i, r := range encoderKey {
+		offsets[i] = -1 * int(r-'a')
+	}
+	return vigenereCipher{key: encoderKey, offsets: offsets}
+}
+
+func encodeRune(r rune, offset int) rune {
+	o := int32(offset)
+	if r+o > 'z' { // encode alphabet wrap
+		return r + -1*('z'-'a'-o) - 1
+	}
+	if r+o < 'a' { // decode alphabet wrap
+		return r + 'z' - 'a' + o + 1
+	}
+	return r + o
 }
