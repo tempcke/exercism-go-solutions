@@ -1,27 +1,22 @@
 package rotationalcipher
 
-import "unicode"
+import (
+	"strings"
+)
 
 // RotationalCipher encodes a given input by a set shift distance
-func RotationalCipher(input string, shift int) string {
-	encoded := make([]rune, len(input))
-	for i, r := range input {
-		encoded[i] = runeShift(r, shift)
-	}
-	return string(encoded)
-}
-
-func runeShift(r rune, distance int) rune {
-	if !unicode.IsLetter(r) {
+func RotationalCipher(input string, distance int) string {
+	return strings.Map(func(r rune) rune {
+		if r >= 'A' && r <= 'Z' {
+			return shiftRune(r, distance, 'A')
+		}
+		if r >= 'a' && r <= 'z' {
+			return shiftRune(r, distance, 'a')
+		}
 		return r
-	}
-	a := int(aOrA(r)) // 97 is the ascii value of the letter a
-	return rune(a + (26+int(r)-a+distance)%26)
+	}, input)
 }
 
-func aOrA(r rune) rune {
-	if r <= 'Z' {
-		return 'A'
-	}
-	return 'a'
+func shiftRune(r rune, distance int, a rune) rune {
+	return a + (26+r-a+int32(distance))%26
 }
