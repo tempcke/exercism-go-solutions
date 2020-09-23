@@ -5,20 +5,20 @@ import (
 	"strings"
 )
 
-const verse = "On the %s day of Christmas my true love gave to me: %s."
+const verseFormat = "On the %s day of Christmas my true love gave to me: %s."
 
 var gifts = []string{
-	"twelve Drummers Drumming",
-	"eleven Pipers Piping",
-	"ten Lords-a-Leaping",
-	"nine Ladies Dancing",
-	"eight Maids-a-Milking",
-	"seven Swans-a-Swimming",
-	"six Geese-a-Laying",
-	"five Gold Rings",
-	"four Calling Birds",
-	"three French Hens",
-	"two Turtle Doves",
+	"twelve Drummers Drumming, ",
+	"eleven Pipers Piping, ",
+	"ten Lords-a-Leaping, ",
+	"nine Ladies Dancing, ",
+	"eight Maids-a-Milking, ",
+	"seven Swans-a-Swimming, ",
+	"six Geese-a-Laying, ",
+	"five Gold Rings, ",
+	"four Calling Birds, ",
+	"three French Hens, ",
+	"two Turtle Doves, and ",
 	"a Partridge in a Pear Tree",
 }
 
@@ -28,27 +28,26 @@ var days = []string{
 	"ninth", "tenth", "eleventh", "twelfth",
 }
 
+var verse []string
+
+// init builds each verse as each is constant
+func init() {
+	verse = make([]string, len(days))
+	for i := range days {
+		verse[i] = fmt.Sprintf(
+			verseFormat,
+			days[i],
+			strings.Join(gifts[11-i:], ""),
+		)
+	}
+}
+
 // Song returns the lyrics to 'The Twelve Days of Christmas'.
 func Song() string {
-	verses := make([]string, len(days))
-	for i := range days {
-		verses[i] = Verse(i + 1)
-	}
-	return strings.Join(verses, "\n")
+	return strings.Join(verse, "\n")
 }
 
 // Verse returns the nth verse to 'The Twelve Days of Christmas'.
 func Verse(n int) string {
-	return fmt.Sprintf(verse, days[n-1], listGifts(n))
-}
-
-func listGifts(n int) string {
-	if n == 1 {
-		return gifts[11]
-	}
-	return fmt.Sprintf(
-		"%s, and %s",
-		strings.Join(gifts[12-n:11], ", "),
-		gifts[11],
-	)
+	return verse[n-1]
 }
