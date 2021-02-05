@@ -18,7 +18,7 @@ const (
 // if a is not within b, nor b within a, then they are UnEqual
 func Sublist(a, b []int) Relation {
 	switch {
-	case isEqual(a, b):
+	case len(a) == len(b) && hasSamePrefix(a, b):
 		return Equal
 	case isSubList(a, b):
 		return SubList
@@ -28,11 +28,8 @@ func Sublist(a, b []int) Relation {
 	return UnEqual
 }
 
-func isEqual(a, b []int) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for i := range a { // UnEqual unless identical
+func hasSamePrefix(a, b []int) bool {
+	for i := range a {
 		if a[i] != b[i] {
 			return false
 		}
@@ -41,15 +38,6 @@ func isEqual(a, b []int) bool {
 }
 
 func isSubList(a, b []int) bool {
-	if len(a) == 0 {
-		return true
-	}
-
-	for i := 0; len(a)+i <= len(b); i++ {
-		if isEqual(a, b[i:i+len(a)]) {
-			return true
-		}
-	}
-
-	return false
+	return len(a) <= len(b) &&
+		(hasSamePrefix(a, b) || isSubList(a, b[1:]))
 }
