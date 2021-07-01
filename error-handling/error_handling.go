@@ -12,11 +12,10 @@ func Use(o ResourceOpener, input string) error {
 
 	retryLimit := 10
 	for i := 0; i < retryLimit; i++ {
-		resource, err = o()
-		if err != nil {
-			if errors.As(err, &TransientError{}) {
-				continue
-			}
+		if resource, err = o(); err == nil {
+			break
+		}
+		if !errors.As(err, &TransientError{}) {
 			return err
 		}
 	}
