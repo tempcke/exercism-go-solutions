@@ -4,14 +4,12 @@ package flatten
 func Flatten(in interface{}) []interface{} {
 	out := []interface{}{}
 
-	for _, val := range in.([]interface{}) {
-		switch v := val.(type) {
-		case []interface{}:
-			if v != nil {
+	for _, v := range in.([]interface{}) {
+		if v != nil {
+			switch v.(type) {
+			case []interface{}:
 				out = append(out, Flatten(v)...)
-			}
-		default:
-			if v != nil {
+			default:
 				out = append(out, v)
 			}
 		}
