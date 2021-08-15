@@ -8,6 +8,7 @@ type Account struct {
 	mu      sync.Mutex
 }
 
+// Open a new Account
 func Open(initialDeposit int64) *Account {
 	if initialDeposit < 0 {
 		return nil
@@ -16,10 +17,12 @@ func Open(initialDeposit int64) *Account {
 	return &Account{balance: initialDeposit, open: true}
 }
 
+// Balance of the Account
 func (a *Account) Balance() (balance int64, ok bool) {
 	return a.balance, a.open
 }
 
+// Deposit into the Account, negative amount does a withdrawal
 func (a *Account) Deposit(amount int64) (newBalance int64, ok bool) {
 	return a.safeChange(func() (int64, bool) {
 		if a.balance+amount < 0 {
@@ -31,6 +34,7 @@ func (a *Account) Deposit(amount int64) (newBalance int64, ok bool) {
 	})
 }
 
+// Close the Account
 func (a *Account) Close() (payout int64, ok bool) {
 	return a.safeChange(func() (int64, bool) {
 		b := a.balance
