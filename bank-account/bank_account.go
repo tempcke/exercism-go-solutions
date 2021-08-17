@@ -4,9 +4,9 @@ import "sync"
 
 // Account is a bank account
 type Account struct {
+	mu      sync.RWMutex
 	balance int64
 	open    bool
-	mu      sync.Mutex
 }
 
 // Open a new Account
@@ -20,14 +20,14 @@ func Open(initialDeposit int64) *Account {
 
 // Balance of the Account
 func (a *Account) Balance() (balance int64, ok bool) {
-	return a.safe(func() (int64, bool) {
-		return a.balance, a.open
-	})
+	a.mu.RLock()
+	defer a.mu.RUnlock()
+	return a.balance, a.open
 }
 
 // Deposit into the Account, negative amount does a withdrawal
 func (a *Account) Deposit(amount int64) (newBalance int64, ok bool) {
-	return a.safe(func() (int64, bool) {
+	return a.safeWrite(func() (int64, bool) {
 		if a.balance+amount < 0 {
 			return a.balance, false
 		}
@@ -39,7 +39,7 @@ func (a *Account) Deposit(amount int64) (newBalance int64, ok bool) {
 
 // Close the Account
 func (a *Account) Close() (payout int64, ok bool) {
-	return a.safe(func() (int64, bool) {
+	return a.safeWrite(func() (int64, bool) {
 		b := a.balance
 		a.open = false
 		a.balance = 0
@@ -47,7 +47,7 @@ func (a *Account) Close() (payout int64, ok bool) {
 	})
 }
 
-func (a *Account) safe(operation func() (int64, bool)) (amount int64, ok bool) {
+func (a *Account) safeWrite(operation func() (int64, bool)) (amount int64, ok bool) {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 
